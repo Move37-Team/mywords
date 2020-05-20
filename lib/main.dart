@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,15 +32,15 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  final _wordTextController = TextEditingController();
+  void _add() {
 
+  }
+
+  Widget _floatingActionWidget;
 
   @override
   Widget build(BuildContext context) {
-
-    void _add() {
-
-    }
 
     return Scaffold(
       appBar: AppBar(
@@ -52,12 +54,41 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               padding: EdgeInsets.all(10),
               child: TextField(
+                controller: _wordTextController,
+                onChanged: (text) => {
+                  setState(() => {
+                    if (text.length > 0){
+                      _floatingActionWidget = FloatingActionButton(
+                        onPressed: () => {},
+                        child: Icon(Icons.add,),
+                      )
+                    } else {
+                      _floatingActionWidget = null
+                    }
+                  })
+                },
                 style: TextStyle(
-                  fontSize: 20
+                  color: Colors.black,
+                  fontFamily: "WorkSansLight",
                 ),
                 decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(10),
-                  hintText: 'Enter a word to search or add'
+                  fillColor: Colors.white,
+                  hintText: 'Enter a word to search or add',
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
+                  ),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                      borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
+                  ),
+                  prefixIcon: Icon(
+                    Icons.title,
+                    color: Colors.black,
+                  ),
+                  hintStyle: TextStyle(
+                      color: Colors.black38, fontFamily: "WorkSansLight"),
+                  filled: true,
                 ),
               ),
             ),
@@ -72,13 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          child: IconButton(
-                            onPressed: () => {},
-                            icon: Icon(Icons.edit, color: Colors.blueAccent),
-                          ),
-                          margin: EdgeInsets.only(left:10, right: 10),
-                        ),
+
                         IconButton(
                           onPressed: () => {},
                           icon: Icon(Icons.delete, color: Colors.redAccent),
@@ -92,11 +117,11 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         )
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _add,
-        tooltip: 'Add New Word',
-        child: Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButton: AnimatedSwitcher(
+        duration: Duration(milliseconds: 250),
+        // don't show the add button if no text typed
+        child: _floatingActionWidget
+      )
     );
   }
 }
