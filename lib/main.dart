@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mywords/components/wordTIle.dart';
 
 void main() {
   runApp(MyApp());
@@ -31,13 +32,15 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
   final _wordTextController = TextEditingController();
   void _add() {
 
   }
 
   Widget _floatingActionWidget;
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     borderRadius: BorderRadius.all(Radius.circular(10.0)),
                     borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
                   ),
-                  border: OutlineInputBorder(
+                  enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10.0)),
                       borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
                   ),
@@ -97,20 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (index > 10)
                   return null;
                 return Card(
-                  child: ListTile(
-                    leading: Icon(Icons.keyboard_arrow_down, color: Colors.blueAccent),
-                    title: Text("Theword"),
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-
-                        IconButton(
-                          onPressed: () => {},
-                          icon: Icon(Icons.delete, color: Colors.redAccent),
-                        ),
-                      ],
-                    ),
-                  )
+                  child: WordTile(title: Text("hello"),)
                 );
               },)
             )
