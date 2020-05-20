@@ -18,10 +18,12 @@ flutter pub get
 
 # Road Map
 
-[ ] add dictionary
+* [ ] categorize words
 
-[ ] autocomplete
-
-[ ] multiple language support
-
-[ ] cloud backend
+* [ ] add dictionary
+ 
+* [ ] autocomplete
+ 
+* [ ] multiple language support
+ 
+* [ ] cloud backend
