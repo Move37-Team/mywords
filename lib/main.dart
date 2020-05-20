@@ -61,7 +61,34 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
             ),
-
+            Expanded(
+              child: ListView.builder(itemBuilder: (BuildContext context, int index) {
+                if (index > 10)
+                  return null;
+                return Card(
+                  child: ListTile(
+                    leading: Icon(Icons.keyboard_arrow_down, color: Colors.blueAccent),
+                    title: Text("Theword"),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          child: IconButton(
+                            onPressed: () => {},
+                            icon: Icon(Icons.edit, color: Colors.blueAccent),
+                          ),
+                          margin: EdgeInsets.only(left:10, right: 10),
+                        ),
+                        IconButton(
+                          onPressed: () => {},
+                          icon: Icon(Icons.delete, color: Colors.redAccent),
+                        ),
+                      ],
+                    ),
+                  )
+                );
+              },)
+            )
           ],
         )
       ),
