@@ -19,9 +19,9 @@ class SectionHeader extends StatelessWidget{
             ),
             Divider(),
 
-            SingleChildScrollView(
-              child: Container(
-                height: 50,
+            Container(
+              height: 100,
+              child: SingleChildScrollView(
                 child: Text("""Simple succession, or the coming after in time, withoutasserting or implying causative energy; as, the reactions of chemicalagents may be conceived as merely invariable sequences."""),
               )
             )
