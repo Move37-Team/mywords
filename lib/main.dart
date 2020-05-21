@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:mywords/components/library.dart';
 import 'package:mywords/components/wordTIle.dart';
 
-void main() {
+void main() async {
   runApp(MyApp());
 }
 
