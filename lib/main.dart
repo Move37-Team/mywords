@@ -8,6 +8,9 @@ import 'package:mywords/components/library.dart';
 import 'package:mywords/components/trie.dart';
 import 'package:mywords/components/wordTIle.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:tuple/tuple.dart';
+
+import 'components/debounce.dart';
 
 void main() async {
   runApp(MyApp());
@@ -41,11 +44,12 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   final WordLibrary _library = WordLibrary();                             // user's custom words selection library
   final _wordTextController = TextEditingController();                    // search text field controller
   List<SingleWord> _showingWords = List();                                // list of the words that are shown in the list view
-  Map<String, dynamic> _dictionary;                                       // english dictionary
-  bool dictLoaded = false;                                                // if dictionary is loaded
+  bool _dictLoaded = false;                                               // if dictionary is loaded
   Widget _floatingActionWidget;                                           // the add button
   RefreshController _refreshController =                                  // refresh controller
   RefreshController(initialRefresh: true);
+  final _debounce = Debounce(milliseconds: 500);                          // search field debounce
+
   _MyHomePageState() {
     _loadDict();
   }
@@ -54,21 +58,56 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     // load english dictionary from json asset
     // load and parse json dictionary
     String jsonString =  await rootBundle.loadString("assets/dictionary_web.json");
-    _dictionary = jsonDecode(jsonString);
+    Map<String, dynamic> _dictionary = jsonDecode(jsonString);
 
     TrieNode.roots = await compute(TrieNode.makeTrieFromDict, _dictionary);
 
     setState(() {
-      dictLoaded = true;
+      _dictLoaded = true;
     });
 
   }
 
   void searchAndUpdateList(String word) {
     // search for the given word in the dictionary and show relevant results
-    if (!dictLoaded)
+    if (!_dictLoaded || word.length == 0)
       return;
 
+    List<SingleWord> wordsFound = List();
+
+    // traverse the word tree up to the given word first
+    TrieNode currentNode;
+    for (var i = 0 ; i < word.length; i ++) {
+      try {
+        currentNode =
+            TrieNode.roots.firstWhere((element) => element.char == word[i]);
+      } catch (E) {}
+    }
+
+    if (currentNode.isWord)
+      wordsFound.add(SingleWord(word));
+
+    // find all the possible words starting from this word
+    List<Tuple2<String, TrieNode>> stack = List();
+
+    stack.add(Tuple2(word, currentNode));
+
+    while(stack.length > 0) {
+      var top = stack[stack.length - 1];
+      stack.removeLast();
+
+      top.item2.next.forEach((element) {
+        String newWord = top.item1 + element.char;
+        if (element.isWord) {
+          wordsFound.add(SingleWord(newWord));
+        }
+        stack.add(Tuple2(newWord, element));
+      });
+    }
+
+    setState(() {
+      _showingWords = wordsFound;
+    });
   }
 
   void _onRefresh() async{
@@ -109,24 +148,26 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
               Container(
                 padding: EdgeInsets.all(10),
                 child: TextField(
-                  enabled: dictLoaded ? true : false,
+                  enabled: _dictLoaded ? true : false,
                   controller: _wordTextController,
                   onChanged: (text) {
-                    if (_wordTextController.text.length > 0){
-                      searchAndUpdateList(text.trim().toLowerCase());
-                      setState(() {
-                        _floatingActionWidget = FloatingActionButton(
-                          onPressed: () => {},
-                          child: Icon(Icons.add,),
-                        );
-                      });
-                    }
-                    else {
-                      setState(() {
-                        _floatingActionWidget = null;
-                        _showingWords = _library.words;
-                      });
-                    }
+                    _debounce.run(() {
+                      if (_wordTextController.text.length > 0){
+                        searchAndUpdateList(text.trim().toLowerCase());
+                        setState(() {
+                          _floatingActionWidget = FloatingActionButton(
+                            onPressed: () => {},
+                            child: Icon(Icons.add,),
+                          );
+                        });
+                      }
+                      else {
+                        setState(() {
+                          _floatingActionWidget = null;
+                          _showingWords = _library.words;
+                        });
+                      }
+                    });
                   },
                   style: TextStyle(
                     color: Colors.black,
@@ -134,7 +175,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                   ),
                   decoration: InputDecoration(
                     fillColor: Colors.white,
-                    hintText: dictLoaded ? 'Enter a word to search or add' : 'Loading dictionary ...',
+                    hintText: _dictLoaded ? 'Enter a word to search or add' : 'Loading dictionary ...',
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
