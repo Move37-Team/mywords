@@ -10,7 +10,9 @@ class WordTile extends StatefulWidget {
 
   final SingleWord word;
   final Function adder;
-  const WordTile({Key key, this.word, this.adder}) : super(key: key);
+  final Function remover;
+
+  const WordTile({Key key, this.word, this.adder, this.remover}) : super(key: key);
 
   @override
   _WordTileState createState() => _WordTileState();
@@ -33,6 +35,9 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
           caption: 'delete',
           color: Colors.redAccent,
           icon: Icons.delete,
+          onTap: () {
+            widget.remover(widget.word);
+          },
         ) : IconSlideAction(
           caption: 'like',
           color: Colors.blueAccent,

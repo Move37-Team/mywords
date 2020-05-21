@@ -73,6 +73,16 @@ class WordLibrary {
     await saveWordToDatabase(_word, await _database);
   }
 
+  void removeWord(SingleWord word) async{
+    _words.remove(word);
+
+    // delete from database
+    Database db = await _database;
+    await db.execute(
+      "DELETE FROM " + _dbTableName + " WHERE word=\"" + word.word + "\""
+    );
+  }
+
   List<SingleWord> get words => _words;
 
   // connect to user library database
@@ -120,7 +130,6 @@ class WordLibrary {
 
     for (var i = 0; i < maps.length ; i ++ ){
       _words.add( SingleWord.fromMap(maps[i], true) );
-      print(i);
     }
   }
 }

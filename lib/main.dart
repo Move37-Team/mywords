@@ -202,6 +202,23 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     );
   }
 
+  void _remove(SingleWord word) {
+    setState(() {
+      word.isInFavoriteList = false;
+      _library.removeWord(word);
+    });
+
+    Fluttertoast.showToast(
+        msg: "Removed from library",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.orangeAccent,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
 
@@ -268,7 +285,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                       itemBuilder: (BuildContext context, int index) {
                         return Card(
                           key: Key(_showingWords[index].word),
-                          child: WordTile( word: _showingWords[index], adder: _add, )
+                          child: WordTile( word: _showingWords[index], adder: _add, remover: _remove,)
                         );
                       },
                       itemCount: _showingWords.length,
