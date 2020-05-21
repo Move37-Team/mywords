@@ -19,8 +19,9 @@ var helloInfo = {
 class WordTile extends StatefulWidget {
 
   final Widget title;               // tile title
+  final String definition;          // definition
 
-  const WordTile({Key key, this.title}) : super(key: key);
+  const WordTile({Key key, this.title, this.definition}) : super(key: key);
 
   @override
   _WordTileState createState() => _WordTileState();
@@ -68,7 +69,7 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SectionHeader(title: "Meaning"),
+              SectionHeader(title: "Meaning", definition: widget.definition, ),
             ],
           )
         ],

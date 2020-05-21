@@ -46,6 +46,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   List<SingleWord> _showingWords = List();                                // list of the words that are shown in the list view
   bool _dictLoaded = false;                                               // if dictionary is loaded
   Widget _floatingActionWidget;                                           // the add button
+  Map<String, dynamic> _dictionary;                                       // the global dictionary
   RefreshController _refreshController =                                  // refresh controller
   RefreshController(initialRefresh: true);
   final _debounce = Debounce(milliseconds: 500);                          // search field debounce
@@ -58,7 +59,10 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     // load english dictionary from json asset
     // load and parse json dictionary
     String jsonString =  await rootBundle.loadString("assets/dictionary_web.json");
-    Map<String, dynamic> _dictionary = jsonDecode(jsonString);
+
+    setState(() {
+      _dictionary = jsonDecode(jsonString);
+    });
 
     TrieNode.roots = await compute(TrieNode.makeTrieFromDict, _dictionary);
 
@@ -74,34 +78,59 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       return;
 
     List<SingleWord> wordsFound = List();
+    TrieNode root;
+
+    try {
+      root = TrieNode.roots.firstWhere((element) => element.char == word[0]);
+    } catch (E) {
+      setState(() {
+        _showingWords = wordsFound;
+      });
+
+      return;
+    }
 
     // traverse the word tree up to the given word first
-    TrieNode currentNode;
-    for (var i = 0 ; i < word.length; i ++) {
+    TrieNode currentNode = root;
+    for (var i = 1 ; i < word.length; i ++) {
       try {
-        currentNode =
-            TrieNode.roots.firstWhere((element) => element.char == word[i]);
-      } catch (E) {}
+        currentNode = currentNode.next.firstWhere((element) => element.char == word[i]);
+      } catch (E) {
+        setState(() {
+          _showingWords = wordsFound;
+        });
+
+        return;
+      }
     }
 
     if (currentNode.isWord)
-      wordsFound.add(SingleWord(word));
+      wordsFound.add(SingleWord(word, _dictionary[word]));
+
+    setState(() {
+      _showingWords = wordsFound;
+    });
+
+    return;
 
     // find all the possible words starting from this word
     List<Tuple2<String, TrieNode>> stack = List();
 
-    stack.add(Tuple2(word, currentNode));
+    currentNode.next.forEach((element) {
+      stack.add(Tuple2(word, element));
+    });
 
     while(stack.length > 0) {
       var top = stack[stack.length - 1];
       stack.removeLast();
+      String newBaseWord = top.item1 + top.item2.char;
+
+      if (top.item2.isWord) {
+        wordsFound.add( SingleWord( newBaseWord, _dictionary[newBaseWord]) );
+      }
 
       top.item2.next.forEach((element) {
-        String newWord = top.item1 + element.char;
-        if (element.isWord) {
-          wordsFound.add(SingleWord(newWord));
-        }
-        stack.add(Tuple2(newWord, element));
+        stack.add(Tuple2(newBaseWord, element));
       });
     }
 
@@ -204,7 +233,8 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     child: ListView.builder (
                       itemBuilder: (BuildContext context, int index) {
                         return Card(
-                            child: WordTile(title: Text(_showingWords[index].word), )
+                          key: Key(_showingWords[index].word),
+                          child: WordTile(title: Text(_showingWords[index].word), definition: _showingWords[index].definition,  )
                         );
                       },
                       itemCount: _showingWords.length,

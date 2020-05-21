@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget{
   final String title;
+  final String definition;
 
-  const SectionHeader({Key key, this.title}) : super(key: key);
+  const SectionHeader({Key key, this.title, this.definition}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -22,8 +23,7 @@ class SectionHeader extends StatelessWidget{
             Container(
               height: 100,
               child: SingleChildScrollView(
-                child: Text("""Simple succession, or the coming after in time, withoutasserting or implying causative energy; as, the reactions of chemicalagents may be conceived as merely invariable sequences."""),
-              )
+                child: Text(definition == null ? " " : definition))
             )
           ],
         )
