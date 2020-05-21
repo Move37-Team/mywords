@@ -95,13 +95,7 @@ class WordLibrary {
           "CREATE TABLE "+ _dbTableName +"(word VARCHAR PRIMARY KEY, definition TEXT)",
         );
       },
-      version: 4,
-      onUpgrade: (db, oldVersion, newVersion) async{
-        if (oldVersion < newVersion)
-          return db.execute(
-            "ALTER TABLE "+ _dbTableName +" ADD COLUMN definition TEXT"
-          );
-      }
+      version: 1
     );
   }
 
