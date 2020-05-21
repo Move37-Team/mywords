@@ -248,7 +248,10 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                       itemBuilder: (BuildContext context, int index) {
                         return Card(
                           key: Key(_showingWords[index].word),
-                          child: WordTile(title: Text(_showingWords[index].word), definition: _showingWords[index].definition,  )
+                          child: WordTile(title: Text(_showingWords[index].word),
+                            titleStr: _showingWords[index].word,
+                            definition: _showingWords[index].definition,
+                          )
                         );
                       },
                       itemCount: _showingWords.length,

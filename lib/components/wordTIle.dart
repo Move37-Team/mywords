@@ -19,9 +19,10 @@ var helloInfo = {
 class WordTile extends StatefulWidget {
 
   final Widget title;               // tile title
+  final String titleStr;            // used as id
   final String definition;          // definition
 
-  const WordTile({Key key, this.title, this.definition}) : super(key: key);
+  const WordTile({Key key, this.title, this.definition, this.titleStr}) : super(key: key);
 
   @override
   _WordTileState createState() => _WordTileState();
@@ -56,7 +57,7 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
         leading: Container(
           margin: EdgeInsets.only(top: 1, bottom: 1),
           child: SvgPicture.string(
-            Jdenticon.toSvg(widget.title.toString()),
+            Jdenticon.toSvg(widget.titleStr),
             fit: BoxFit.contain),
         ),
         title: widget.title,
