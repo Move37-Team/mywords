@@ -1,6 +1,6 @@
 # MyWords
-Simple Flutter Application to Save Your Favorite Words
-
+Simple English Dictionary Based on Webster's Unabridged English Dictionary With Identicons for each word and 
+a light weight utility to save your favorite words, in Flutter!
 
 # Getting Started
 
@@ -14,14 +14,45 @@ install the requirements
 flutter pub get
 ```
 
+# Dictionary files
+
+Two dictionary files are used in this project. both are in json format.
+
+```assets/dictionary_web.json``` is the Webster's Unabridged English Dictionary in json format with the following structure:
+
+```
+{
+"word": "Meaning"
+}
+```
+
+```assets/trie_dict.json``` is a list of all words in the above file but trie data structure
+
+sample
+```
+{
+"w": {
+        "o": {
+                "r": {
+                        "d" : {
+                                "_end_": "_end_"
+                              }
+                     }
+             }
+    }
+}
+```
+
 ***if you make any changes, improvements or bug fixes please consider a PR***
 
 # Road Map
 
 * [ ] categorize words
 
-* [ ] add dictionary
- 
+* [x] add dictionary
+
+* [ ] custom word with custom definition
+
 * [ ] autocomplete
  
 * [ ] multiple language support
