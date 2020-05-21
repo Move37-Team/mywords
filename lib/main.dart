@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mywords/components/library.dart';
 import 'package:mywords/components/wordTIle.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -189,6 +190,16 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       word.isInFavoriteList = true;
       _library.addWord(word);
     });
+
+    Fluttertoast.showToast(
+        msg: "Added to library",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.blueAccent,
+        textColor: Colors.white,
+        fontSize: 16.0
+    );
   }
 
   @override
