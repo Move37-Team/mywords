@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     _loadDict();
   }
 
-  Future<void> _loadDict() async {
+  Future<bool> _loadDict() async {
     // load english dictionary from json asset
     // load and parse json dictionary
     String jsonString =  await rootBundle.loadString("assets/dictionary_web.json");
@@ -72,12 +72,18 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
   }
 
-  void searchAndUpdateList(String word) {
-    // search for the given word in the dictionary and show relevant results
+  Future<void> searchAndUpdateList(String word) async {
+    // search for the given word in the dictionary
+    // also shows every possible word starting with the given word
+    // if nothing is found, the given word will be returned
+
     if (!_dictLoaded || word.length == 0)
       return;
 
+    // search results
     List<SingleWord> wordsFound = List();
+
+    // the node that the search starts with, it's based on the first character of the given word
     TrieNode root;
 
     try {
@@ -104,56 +110,66 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       }
     }
 
-    if (currentNode.isWord)
-      wordsFound.add(SingleWord(word, _dictionary[word]));
-
-    setState(() {
-      _showingWords = wordsFound;
-    });
-
-    return;
+    // regardless of word being found, add it to the list
+    wordsFound.add(SingleWord(word, _dictionary[word]));
 
     // find all the possible words starting from this word
-    List<Tuple2<String, TrieNode>> stack = List();
+    List<Tuple2<String, TrieNode>> stack = List();  // (baseWord, node)
 
     currentNode.next.forEach((element) {
       stack.add(Tuple2(word, element));
     });
 
     while(stack.length > 0) {
+      // pop an item from the top of the stack
       var top = stack[stack.length - 1];
       stack.removeLast();
-      String newBaseWord = top.item1 + top.item2.char;
 
+      // make a new word by concatenating
+      // the current node's char to the it's baseWord
+      String newWord = top.item1 + top.item2.char;
+
+      // add to the list of the newly generated word is actually an english word
       if (top.item2.isWord) {
-        wordsFound.add( SingleWord( newBaseWord, _dictionary[newBaseWord]) );
+        wordsFound.add( SingleWord( newWord, _dictionary[newWord]) );
       }
 
+      // add the current nodes children with the new word as their baseWord to be checked
       top.item2.next.forEach((element) {
-        stack.add(Tuple2(newBaseWord, element));
+        stack.add(Tuple2(newWord, element));
       });
     }
 
+    // update the show words list
     setState(() {
       _showingWords = wordsFound;
     });
   }
 
+  Future<void> doRefresh() {
+    // if the search field is not empty refresh based on dictionary data
+    if (_wordTextController.text.trim().length > 0) {
+      searchAndUpdateList(_wordTextController.text.trim().toLowerCase());
+
+    } else {
+      // if search filed is empty reload user's favorite words from database
+      _library.loadFromDatabase();
+
+      // only update if everything is mounted
+      if (mounted)
+        setState(() {
+          _showingWords = _library.words;
+        });
+    }
+  }
+
   void _onRefresh() async{
-    await _library.loadFromDatabase();
+    await doRefresh();
     _refreshController.refreshCompleted();
-    setState(() {
-      _showingWords = _library.words;
-    });
   }
 
   void _onLoading() async{
-    // monitor network fetch
-    await _library.loadFromDatabase();
-    if(mounted)
-      setState(() {
-        _showingWords = _library.words;
-      });
+    await doRefresh();
     _refreshController.loadComplete();
   }
 
