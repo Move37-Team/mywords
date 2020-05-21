@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:mywords/components/library.dart';
-import 'package:mywords/components/trie.dart';
 import 'package:mywords/components/wordTIle.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:tuple/tuple.dart';
@@ -47,6 +46,8 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   bool _dictLoaded = false;                                               // if dictionary is loaded
   Widget _floatingActionWidget;                                           // the add button
   Map<String, dynamic> _dictionary;                                       // the global dictionary
+  Map<String, dynamic> _trieDict;                                         // the global dictionary keys in trie structure
+
   RefreshController _refreshController =                                  // refresh controller
   RefreshController(initialRefresh: true);
   final _debounce = Debounce(milliseconds: 500);                          // search field debounce
@@ -58,13 +59,13 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   Future<bool> _loadDict() async {
     // load english dictionary from json asset
     // load and parse json dictionary
-    String jsonString =  await rootBundle.loadString("assets/dictionary_web.json");
+    String dictJsonString =  await rootBundle.loadString("assets/dictionary_web.json");
+    String trieJsonString =  await rootBundle.loadString("assets/trie_dict.json");
 
     setState(() {
-      _dictionary = jsonDecode(jsonString);
+      _dictionary = jsonDecode(dictJsonString);
+      _trieDict = jsonDecode(trieJsonString);
     });
-
-    TrieNode.roots = await compute(TrieNode.makeTrieFromDict, _dictionary);
 
     setState(() {
       _dictLoaded = true;
@@ -84,10 +85,10 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     List<SingleWord> wordsFound = List();
 
     // the node that the search starts with, it's based on the first character of the given word
-    TrieNode root;
+    Map<String, dynamic> root;
 
     try {
-      root = TrieNode.roots.firstWhere((element) => element.char == word[0]);
+      root = _trieDict[word[0]];
     } catch (E) {
       setState(() {
         _showingWords = wordsFound;
@@ -97,10 +98,10 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     }
 
     // traverse the word tree up to the given word first
-    TrieNode currentNode = root;
+    Map<String, dynamic> currentNode = root;
     for (var i = 1 ; i < word.length; i ++) {
       try {
-        currentNode = currentNode.next.firstWhere((element) => element.char == word[i]);
+        currentNode = currentNode[word[i]];
       } catch (E) {
         setState(() {
           _showingWords = wordsFound;
@@ -114,10 +115,12 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     wordsFound.add(SingleWord(word, _dictionary[word]));
 
     // find all the possible words starting from this word
-    List<Tuple2<String, TrieNode>> stack = List();  // (baseWord, node)
+    List<Tuple2<String, Map<String, dynamic>> > stack = List();  // (baseWord, node)
 
-    currentNode.next.forEach((element) {
-      stack.add(Tuple2(word, element));
+    currentNode.keys.forEach((element) {
+      if ( currentNode[element].runtimeType != String ) {
+        stack.add(Tuple2(word + element, currentNode[element]));
+      }
     });
 
     while(stack.length > 0) {
@@ -125,18 +128,14 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       var top = stack[stack.length - 1];
       stack.removeLast();
 
-      // make a new word by concatenating
-      // the current node's char to the it's baseWord
-      String newWord = top.item1 + top.item2.char;
-
-      // add to the list of the newly generated word is actually an english word
-      if (top.item2.isWord) {
-        wordsFound.add( SingleWord( newWord, _dictionary[newWord]) );
-      }
+      if (top.item2.containsKey("_end_"))
+        wordsFound.add( SingleWord( top.item1, _dictionary[top.item1]) );
 
       // add the current nodes children with the new word as their baseWord to be checked
-      top.item2.next.forEach((element) {
-        stack.add(Tuple2(newWord, element));
+      top.item2.keys.forEach((element) {
+        if ( top.item2[element].runtimeType != String ) {
+          stack.add(Tuple2(top.item1 + element, top.item2[element]));
+        }
       });
     }
 
@@ -146,20 +145,19 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     });
   }
 
-  Future<void> doRefresh() {
+  Future<void> doRefresh() async {
     // if the search field is not empty refresh based on dictionary data
     if (_wordTextController.text.trim().length > 0) {
-      searchAndUpdateList(_wordTextController.text.trim().toLowerCase());
+      await searchAndUpdateList(_wordTextController.text.trim().toLowerCase());
 
     } else {
       // if search filed is empty reload user's favorite words from database
-      _library.loadFromDatabase();
+      await _library.loadFromDatabase();
 
       // only update if everything is mounted
-      if (mounted)
-        setState(() {
-          _showingWords = _library.words;
-        });
+      setState(() {
+        _showingWords = _library.words;
+      });
     }
   }
 

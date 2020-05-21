@@ -31,30 +31,23 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
 
   bool _expanded = false;
   AnimationController _controller;
-  Widget _wordIdenticon;
-
-  @override
-  void initState() {
-    super.initState();
-
-    String rawSvg = Jdenticon.toSvg(widget.title.toString());
-    _wordIdenticon = SvgPicture.string(rawSvg, fit: BoxFit.contain);
-  }
 
   @override
   Widget build(BuildContext context) {
 
     return Slidable (
-        actionPane: SlidableDrawerActionPane(),
-        actionExtentRatio: 0.25,
-        actions: <Widget>[
-          IconSlideAction(
-            caption: 'delete',
-            color: Colors.redAccent,
-            icon: Icons.delete,
-          ),
-        ],
-        child:ExpansionTile(
+      key: Key(widget.title.toString()),
+      actionPane: SlidableDrawerActionPane(),
+      actionExtentRatio: 0.25,
+      actions: <Widget>[
+        IconSlideAction(
+          caption: 'delete',
+          color: Colors.redAccent,
+          icon: Icons.delete,
+        ),
+      ],
+      child:ExpansionTile(
+        key: Key(widget.title.toString()),
         onExpansionChanged: (isExpanded){
           setState(() {
             _expanded = isExpanded;
@@ -62,7 +55,9 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
         },
         leading: Container(
           margin: EdgeInsets.only(top: 1, bottom: 1),
-          child: _wordIdenticon,
+          child: SvgPicture.string(
+            Jdenticon.toSvg(widget.title.toString()),
+            fit: BoxFit.contain),
         ),
         title: widget.title,
         children: [
