@@ -4,19 +4,60 @@ import 'package:sqflite/sqflite.dart';
 /// A library of user marked words
 ///
 
-class WordLibrary {
-  Set<String> _words;
+class SingleWord {
+  String _word;
+  String _definition;
 
-  final _dbTableName = "user_library";
+  set word(String word) {
+    _word = word.toLowerCase();
+  }
+
+  set definition(String definition) {
+    if (definition == null)
+      _definition = "";
+
+    _definition = definition;
+  }
+
+  get definition => _definition;
+  get word => _word;
+
+  SingleWord(String word, [String definition]) {
+    this.word = word;
+    this.definition = definition;
+  }
+
+  Map<String, String> toMap() {
+    return {
+      'word': word,
+      'definition': definition
+    };
+  }
+
+  static SingleWord fromMap(Map<String, dynamic> wordMap) {
+    return SingleWord(wordMap['word'], wordMap['definition'].toString());
+  }
+
+}
+
+class WordLibrary {
+  List<SingleWord> _words;
+
+  static final _dbTableName = "user_library";
 
   WordLibrary() {
-    _words = Set();
+    _words = List();
   }
 
-  void addWord(String word) {
-    _words.add(word.toLowerCase());
+  void addWord(String word, [String definition]) async{
+    SingleWord _word = SingleWord(word, definition);
+    _words.add(_word);
+
+    // save it to the database
+    await saveWordToDatabase(_word, await _database);
   }
-  Set<String> get words => _words;
+
+  List<SingleWord> get words => _words;
 
   // connect to user library database
   get _database async {
@@ -25,22 +66,24 @@ class WordLibrary {
       onCreate: (db, version) {
         // Run the CREATE TABLE statement on the database.
         return db.execute(
-          "CREATE TABLE "+ _dbTableName +"(word VARCHAR PRIMARY KEY)",
+          "CREATE TABLE "+ _dbTableName +"(word VARCHAR PRIMARY KEY, definition TEXT)",
         );
       },
-      version: 1
+      version: 2
+    );
+  }
+
+  Future<void> saveWordToDatabase(SingleWord word, Database db) async {
+    await db.insert(_dbTableName,
+      word.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 
   Future<void> saveToDatabase() async {
     Database db = await _database;
     _words.forEach((word) async {
-      await db.insert(_dbTableName,
-        {
-          'word': word
-        },
-        conflictAlgorithm: ConflictAlgorithm.replace,
-      );
+      await saveWordToDatabase(word, db);
     });
   }
 
@@ -51,10 +94,11 @@ class WordLibrary {
     final List<Map<String, dynamic>> maps = await db.query(_dbTableName);
 
     // Convert the List<Map<String, dynamic> into a List<Dog>.
-    _words = Set();
+    _words = List();
 
     for (var i = 0; i < maps.length ; i ++ ){
-      _words.add(maps[i]['word']);
+      _words.add( SingleWord.fromMap(maps[i]) );
+      print(i);
     }
   }
 }

@@ -1,7 +1,11 @@
+import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:mywords/components/library.dart';
 import 'package:mywords/components/wordTIle.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 void main() async {
   runApp(MyApp());
@@ -32,14 +36,62 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
-  final _wordTextController = TextEditingController();
-  void _add() {
+  final WordLibrary _library = WordLibrary();                             // user's custom words selection library
+  final _wordTextController = TextEditingController();                    // search text field controller
+  List<SingleWord> _showingWords = List();                                // list of the words that are shown in the list view
+  Map<String, dynamic> _dictionary;                                       // english dictionary
+  bool dictLoaded = false;                                                // if dictionary is loaded
+  Widget _floatingActionWidget;                                           // the add button
+  RefreshController _refreshController =                                  // refresh controller
+  RefreshController(initialRefresh: true);
+  _MyHomePageState() {
+    _loadDict();
+  }
+
+  Future<void> _loadDict() async {
+    // load english dictionary from json asset
+
+    // set refreshing header
+    _refreshController.headerMode?.value = RefreshStatus.refreshing;
+
+    // load and parse json dictionary
+    String jsonString =  await rootBundle.loadString("assets/dictionary_web.json");
+    _dictionary = jsonDecode(jsonString);
+
+    setState(() {
+      dictLoaded = true;
+    });
 
   }
 
-  Widget _floatingActionWidget;
+  void searchAndUpdateList(String word) {
+    // search for the given word in the dictionary and show relevant results
+    if (!dictLoaded)
+      return;
 
+  }
 
+  void _onRefresh() async{
+    await _library.loadFromDatabase();
+    _refreshController.refreshCompleted();
+    setState(() {
+      _showingWords = _library.words;
+    });
+  }
+
+  void _onLoading() async{
+    // monitor network fetch
+    await _library.loadFromDatabase();
+    if(mounted)
+      setState(() {
+        _showingWords = _library.words;
+      });
+    _refreshController.loadComplete();
+  }
+
+  void _add() {
+
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,65 +99,80 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
+
       ),
       body: Center(
 
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            Container(
-              padding: EdgeInsets.all(10),
-              child: TextField(
-                controller: _wordTextController,
-                onChanged: (text) => {
-                  setState(() => {
-                    if (text.length > 0){
-                      _floatingActionWidget = FloatingActionButton(
-                        onPressed: () => {},
-                        child: Icon(Icons.add,),
-                      )
-                    } else {
-                      _floatingActionWidget = null
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.all(10),
+                child: TextField(
+                  controller: _wordTextController,
+                  onChanged: (text) {
+                    if (_wordTextController.text.length > 0){
+                      searchAndUpdateList(text.trim().toLowerCase());
+                      setState(() {
+                        _floatingActionWidget = FloatingActionButton(
+                          onPressed: () => {},
+                          child: Icon(Icons.add,),
+                        );
+                      });
                     }
-                  })
-                },
-                style: TextStyle(
-                  color: Colors.black,
-                  fontFamily: "WorkSansLight",
-                ),
-                decoration: InputDecoration(
-                  fillColor: Colors.white,
-                  hintText: 'Enter a word to search or add',
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                    borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                      borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
-                  ),
-                  prefixIcon: Icon(
-                    Icons.title,
+                    else {
+                      setState(() {
+                        _floatingActionWidget = null;
+                        _refreshController.requestRefresh();
+                      });
+                    }
+                  },
+                  style: TextStyle(
                     color: Colors.black,
+                    fontFamily: "WorkSansLight",
                   ),
-                  hintStyle: TextStyle(
-                      color: Colors.black38, fontFamily: "WorkSansLight"),
-                  filled: true,
+                  decoration: InputDecoration(
+                    fillColor: Colors.white,
+                    hintText: 'Enter a word to search or add',
+                    focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                        borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
+                    ),
+                    prefixIcon: Icon(
+                      Icons.title,
+                      color: Colors.black,
+                    ),
+                    hintStyle: TextStyle(
+                        color: Colors.black38, fontFamily: "WorkSansLight"),
+                    filled: true,
+                  ),
                 ),
               ),
-            ),
-            Expanded(
-              child: ListView.builder(itemBuilder: (BuildContext context, int index) {
-                if (index > 10)
-                  return null;
-                return Card(
-                  child: WordTile(title: Text("hello"),)
-                );
-              },)
-            )
-          ],
-        )
+              Expanded(
+                  child: SmartRefresher(
+                    controller: _refreshController,
+                    header: WaterDropHeader(),
+                    enablePullDown: true,
+                    onRefresh: _onRefresh,
+                    onLoading: _onLoading,
+                    child: ListView.builder (
+                      itemBuilder: (BuildContext context, int index) {
+                        return Card(
+                            child: WordTile(title: Text(_showingWords[index].word), )
+                        );
+                      },
+                      itemCount: _showingWords.length,
+                  )
+                )
+              )
+            ],
+          )
       ),
+
       floatingActionButton: AnimatedSwitcher(
         duration: Duration(milliseconds: 250),
         // don't show the add button if no text typed
