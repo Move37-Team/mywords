@@ -9,8 +9,8 @@ import 'package:mywords/components/sectionHeader.dart';
 class WordTile extends StatefulWidget {
 
   final SingleWord word;
-
-  const WordTile({Key key, this.word}) : super(key: key);
+  final Function adder;
+  const WordTile({Key key, this.word, this.adder}) : super(key: key);
 
   @override
   _WordTileState createState() => _WordTileState();
@@ -29,11 +29,18 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
       actionPane: SlidableDrawerActionPane(),
       actionExtentRatio: 0.25,
       actions: <Widget>[
-        IconSlideAction(
+        widget.word.isInFavoriteList ? IconSlideAction(
           caption: 'delete',
           color: Colors.redAccent,
           icon: Icons.delete,
-        ),
+        ) : IconSlideAction(
+          caption: 'like',
+          color: Colors.blueAccent,
+          icon: Icons.favorite,
+          onTap: () {
+            widget.adder(widget.word);
+          },
+        )
       ],
       child:ExpansionTile(
         key: Key(widget.word.word.toString()),

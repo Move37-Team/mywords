@@ -44,7 +44,6 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   final _wordTextController = TextEditingController();                    // search text field controller
   List<SingleWord> _showingWords = List();                                // list of the words that are shown in the list view
   bool _dictLoaded = false;                                               // if dictionary is loaded
-  Widget _floatingActionWidget;                                           // the add button
   Map<String, dynamic> _dictionary;                                       // the global dictionary
   Map<String, dynamic> _trieDict;                                         // the global dictionary keys in trie structure
 
@@ -84,6 +83,15 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     // search results
     List<SingleWord> wordsFound = List();
 
+    // regardless of word being found, add it to the list
+    wordsFound.add(
+        SingleWord(
+            word: word,
+            definition: _dictionary[word],
+            isInFavoriteList: _library.contains(word)
+        )
+    );
+
     // the node that the search starts with, it's based on the first character of the given word
     Map<String, dynamic> root;
 
@@ -111,14 +119,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       }
     }
 
-    // regardless of word being found, add it to the list
-    wordsFound.add(
-        SingleWord(
-          word: word,
-          definition: _dictionary[word],
-          isInFavoriteList: _library.contains(word)
-        )
-    );
+
 
     // find all the possible words starting from this word
     List<Tuple2<String, Map<String, dynamic>> > stack = List();  // (baseWord, node)
@@ -139,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
           SingleWord(
             word: top.item1,
             definition: _dictionary[top.item1],
-            isInFavoriteList: _library.contains(word)
+            isInFavoriteList: _library.contains(top.item1)
           )
         );
 
@@ -183,8 +184,11 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     _refreshController.loadComplete();
   }
 
-  void _add() {
-
+  void _add(SingleWord word) {
+    setState(() {
+      word.isInFavoriteList = true;
+      _library.addWord(word);
+    });
   }
 
   @override
@@ -209,16 +213,9 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     _debounce.run(() {
                       if (_wordTextController.text.length > 0){
                         searchAndUpdateList(text.trim().toLowerCase());
-                        setState(() {
-                          _floatingActionWidget = FloatingActionButton(
-                            onPressed: () => {},
-                            child: Icon(Icons.add,),
-                          );
-                        });
                       }
                       else {
                         setState(() {
-                          _floatingActionWidget = null;
                           _showingWords = _library.words;
                         });
                       }
@@ -260,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                       itemBuilder: (BuildContext context, int index) {
                         return Card(
                           key: Key(_showingWords[index].word),
-                          child: WordTile( word: _showingWords[index], )
+                          child: WordTile( word: _showingWords[index], adder: _add, )
                         );
                       },
                       itemCount: _showingWords.length,
@@ -270,12 +267,6 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
             ],
           )
       ),
-
-      floatingActionButton: AnimatedSwitcher(
-        duration: Duration(milliseconds: 250),
-        // don't show the add button if no text typed
-        child: _floatingActionWidget
-      )
     );
   }
 }

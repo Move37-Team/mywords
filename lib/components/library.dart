@@ -35,7 +35,7 @@ class SingleWord {
   Map<String, String> toMap() {
     return {
       'word': word,
-      'definition': definition
+      'definition': (definition == null || definition == "") ? "NA" : definition
     };
   }
 
@@ -65,8 +65,8 @@ class WordLibrary {
     }
   }
 
-  void addWord(String word, [String definition]) async{
-    SingleWord _word = SingleWord(word: word, definition: definition, isInFavoriteList: true);
+  void addWord(SingleWord word) async{
+    SingleWord _word = SingleWord(word: word.word, definition: word.definition, isInFavoriteList: true);
     _words.add(_word);
 
     // save it to the database
@@ -85,7 +85,13 @@ class WordLibrary {
           "CREATE TABLE "+ _dbTableName +"(word VARCHAR PRIMARY KEY, definition TEXT)",
         );
       },
-      version: 2
+      version: 4,
+      onUpgrade: (db, oldVersion, newVersion) async{
+        if (oldVersion < newVersion)
+          return db.execute(
+            "ALTER TABLE "+ _dbTableName +" ADD COLUMN definition TEXT"
+          );
+      }
     );
   }
 
