@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:mywords/components/library.dart';
+import 'package:mywords/components/trie.dart';
 import 'package:mywords/components/wordTIle.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
@@ -50,13 +52,11 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
   Future<void> _loadDict() async {
     // load english dictionary from json asset
-
-    // set refreshing header
-    _refreshController.headerMode?.value = RefreshStatus.refreshing;
-
     // load and parse json dictionary
     String jsonString =  await rootBundle.loadString("assets/dictionary_web.json");
     _dictionary = jsonDecode(jsonString);
+
+    TrieNode.roots = await compute(TrieNode.makeTrieFromDict, _dictionary);
 
     setState(() {
       dictLoaded = true;
@@ -109,6 +109,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
               Container(
                 padding: EdgeInsets.all(10),
                 child: TextField(
+                  enabled: dictLoaded ? true : false,
                   controller: _wordTextController,
                   onChanged: (text) {
                     if (_wordTextController.text.length > 0){
@@ -123,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                     else {
                       setState(() {
                         _floatingActionWidget = null;
-                        _refreshController.requestRefresh();
+                        _showingWords = _library.words;
                       });
                     }
                   },
@@ -133,7 +134,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                   ),
                   decoration: InputDecoration(
                     fillColor: Colors.white,
-                    hintText: 'Enter a word to search or add',
+                    hintText: dictLoaded ? 'Enter a word to search or add' : 'Loading dictionary ...',
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10.0)),
                         borderSide: BorderSide(style: BorderStyle.solid, color: Colors.black12)
