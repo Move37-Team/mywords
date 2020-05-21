@@ -112,7 +112,13 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     }
 
     // regardless of word being found, add it to the list
-    wordsFound.add(SingleWord(word, _dictionary[word]));
+    wordsFound.add(
+        SingleWord(
+          word: word,
+          definition: _dictionary[word],
+          isInFavoriteList: _library.contains(word)
+        )
+    );
 
     // find all the possible words starting from this word
     List<Tuple2<String, Map<String, dynamic>> > stack = List();  // (baseWord, node)
@@ -129,7 +135,13 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       stack.removeLast();
 
       if (top.item2.containsKey("_end_"))
-        wordsFound.add( SingleWord( top.item1, _dictionary[top.item1]) );
+        wordsFound.add(
+          SingleWord(
+            word: top.item1,
+            definition: _dictionary[top.item1],
+            isInFavoriteList: _library.contains(word)
+          )
+        );
 
       // add the current nodes children with the new word as their baseWord to be checked
       top.item2.keys.forEach((element) {
@@ -248,10 +260,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                       itemBuilder: (BuildContext context, int index) {
                         return Card(
                           key: Key(_showingWords[index].word),
-                          child: WordTile(title: Text(_showingWords[index].word),
-                            titleStr: _showingWords[index].word,
-                            definition: _showingWords[index].definition,
-                          )
+                          child: WordTile( word: _showingWords[index], )
                         );
                       },
                       itemCount: _showingWords.length,

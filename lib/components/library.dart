@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 class SingleWord {
   String _word;
   String _definition;
+  bool isInFavoriteList = false;
 
   set word(String word) {
     _word = word.toLowerCase();
@@ -22,9 +23,13 @@ class SingleWord {
   get definition => _definition;
   get word => _word;
 
-  SingleWord(String word, [String definition]) {
+  SingleWord({String word, String definition, bool isInFavoriteList}) {
     this.word = word;
     this.definition = definition;
+    if (isInFavoriteList == null)
+      this.isInFavoriteList = false;
+    else
+      this.isInFavoriteList = isInFavoriteList;
   }
 
   Map<String, String> toMap() {
@@ -34,8 +39,10 @@ class SingleWord {
     };
   }
 
-  static SingleWord fromMap(Map<String, dynamic> wordMap) {
-    return SingleWord(wordMap['word'], wordMap['definition'].toString());
+  static SingleWord fromMap(Map<String, dynamic> wordMap, bool isInFavoriteList) {
+    return SingleWord(word: wordMap['word'],
+        definition: wordMap['definition'].toString(),
+        isInFavoriteList: isInFavoriteList);
   }
 
 }
@@ -49,8 +56,17 @@ class WordLibrary {
     _words = List();
   }
 
+  bool contains(String word) {
+    try {
+      _words.firstWhere((element) => element.word == word);
+      return true;
+    } catch (E) {
+      return false;
+    }
+  }
+
   void addWord(String word, [String definition]) async{
-    SingleWord _word = SingleWord(word, definition);
+    SingleWord _word = SingleWord(word: word, definition: definition, isInFavoriteList: true);
     _words.add(_word);
 
     // save it to the database
@@ -97,7 +113,7 @@ class WordLibrary {
     _words = List();
 
     for (var i = 0; i < maps.length ; i ++ ){
-      _words.add( SingleWord.fromMap(maps[i]) );
+      _words.add( SingleWord.fromMap(maps[i], true) );
       print(i);
     }
   }
