@@ -97,9 +97,17 @@ class WordLibrary {
       join(await getDatabasesPath(), 'user_library.db'),
       onCreate: (db, version) {
         // Run the CREATE TABLE statement on the database.
-        return db.execute(
-          "CREATE TABLE "+ _dbTableName +"(word VARCHAR PRIMARY KEY, definition TEXT)",
-        );
+        if (version == 1) {
+          return db.execute(
+            "CREATE TABLE " + _dbTableName +
+                "(word VARCHAR PRIMARY KEY, definition TEXT)",
+          );
+        } else if (version == 2) {
+          return db.execute(
+              "CREATE TABLE " + _dbTableName +
+                  "(word VARCHAR PRIMARY KEY, definition TEXT, synonyms TEXT)",
+          );
+        }
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion == 1 && newVersion == 2) {
