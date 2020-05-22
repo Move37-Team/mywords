@@ -7,6 +7,7 @@ import 'package:sqflite/sqflite.dart';
 class SingleWord {
   String _word;
   String _definition;
+  String synonyms;
   bool isInFavoriteList = false;
 
   set word(String word) {
@@ -23,7 +24,7 @@ class SingleWord {
   get definition => _definition;
   get word => _word;
 
-  SingleWord({String word, String definition, bool isInFavoriteList}) {
+  SingleWord({String word, String definition, bool isInFavoriteList, this.synonyms}) {
     this.word = word;
     this.definition = definition;
     if (isInFavoriteList == null)

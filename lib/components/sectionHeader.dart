@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget{
   final String title;
-  final String definition;
+  final String content;
 
-  const SectionHeader({Key key, this.title, this.definition}) : super(key: key);
+  const SectionHeader({Key key, this.title, this.content}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -21,9 +21,10 @@ class SectionHeader extends StatelessWidget{
             Divider(),
 
             Container(
-              height: 100,
+              padding: EdgeInsets.all(10),
+              constraints: BoxConstraints(maxHeight: 250,),
               child: SingleChildScrollView(
-                child: Text(definition == null ? " " : definition))
+                child: Text(content == null ? " " : content))
             )
           ],
         )

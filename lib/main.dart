@@ -6,8 +6,6 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:mywords/components/library.dart';
 import 'package:mywords/components/wordTIle.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
-import 'package:tuple/tuple.dart';
-
 import 'components/debounce.dart';
 import 'components/dictionary.dart';
 

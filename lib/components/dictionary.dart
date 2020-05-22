@@ -96,7 +96,7 @@ class Dictionary {
         SingleWord(
             word: word,
             definition: _dictionary[word],
-
+            synonyms: _synonymsDict[word],
             // the flag is set to false, but one should change it the appropriate value upon using it
             // it's set to false because I want to keep the coupling with other classes to minimum
             isInFavoriteList: false
@@ -140,6 +140,7 @@ class Dictionary {
         wordsFound.add(
             SingleWord(
                 word: top.item1,
+                synonyms: _synonymsDict[word],
                 definition: _dictionary[top.item1],
                 isInFavoriteList: false
             )

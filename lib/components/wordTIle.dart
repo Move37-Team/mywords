@@ -65,7 +65,8 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SectionHeader(title: "Meaning", definition: widget.word.definition, ),
+              SectionHeader(title: "Synonyms", content: widget.word.synonyms, ),
+              SectionHeader(title: "Meaning", content: widget.word.definition, ),
             ],
           )
         ],
