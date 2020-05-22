@@ -43,7 +43,7 @@ sample
 }
 ```
 
-```assets/synonysm_dict.json``` a dictionary of word synonyms
+```assets/synonyms_dict.json``` a dictionary of word synonyms
 
 ```
 {
