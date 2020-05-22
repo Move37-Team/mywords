@@ -22,7 +22,7 @@ Two dictionary files are used in this project. both are in json format.
 
 ```
 {
-"word": "Meaning"
+    "word": "Meaning"
 }
 ```
 
@@ -31,15 +31,23 @@ Two dictionary files are used in this project. both are in json format.
 sample
 ```
 {
-"w": {
-        "o": {
-                "r": {
-                        "d" : {
-                                "_end_": "_end_"
-                              }
-                     }
-             }
-    }
+    "w": {
+            "o": {
+                    "r": {
+                            "d" : {
+                                    "_end_": "_end_"
+                                  }
+                         }
+                 }
+        }
+}
+```
+
+```assets/synonysm_dict.json``` a dictionary of word synonyms
+
+```
+{
+    "word": "comma separated list of synonyms as a string"
 }
 ```
 
