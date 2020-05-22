@@ -61,7 +61,7 @@ sample
 
 * [ ] custom word with custom definition
 
-* [ ] autocomplete
+* [x] autocomplete
  
 * [ ] multiple language support
  
