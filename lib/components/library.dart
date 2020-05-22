@@ -36,13 +36,15 @@ class SingleWord {
   Map<String, String> toMap() {
     return {
       'word': word,
-      'definition': (definition == null || definition == "") ? "NA" : definition
+      'definition': (definition == null || definition == "") ? "NA" : definition,
+      'synonyms': (synonyms == null || synonyms == "") ? "NA" : synonyms
     };
   }
 
   static SingleWord fromMap(Map<String, dynamic> wordMap, bool isInFavoriteList) {
     return SingleWord(word: wordMap['word'],
         definition: wordMap['definition'].toString(),
+        synonyms: wordMap['synonyms'].toString(),
         isInFavoriteList: isInFavoriteList);
   }
 
@@ -67,7 +69,10 @@ class WordLibrary {
   }
 
   void addWord(SingleWord word) async{
-    SingleWord _word = SingleWord(word: word.word, definition: word.definition, isInFavoriteList: true);
+    SingleWord _word = SingleWord(word: word.word,
+        definition: word.definition,
+        synonyms: word.synonyms,
+        isInFavoriteList: true);
     _words.add(_word);
 
     // save it to the database
@@ -75,7 +80,7 @@ class WordLibrary {
   }
 
   void removeWord(SingleWord word) async{
-    _words.remove(word);
+    _words.removeWhere((_word) => _word.word == word.word);
 
     // delete from database
     Database db = await _database;
@@ -96,7 +101,14 @@ class WordLibrary {
           "CREATE TABLE "+ _dbTableName +"(word VARCHAR PRIMARY KEY, definition TEXT)",
         );
       },
-      version: 1
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion == 1 && newVersion == 2) {
+          db.execute(
+            "ALTER TABLE "+ _dbTableName +" ADD COLUMN synonyms TEXT",
+          );
+        }
+      },
+      version: 2
     );
   }
 

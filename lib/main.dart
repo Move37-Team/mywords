@@ -84,7 +84,6 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
   void _add(SingleWord word) {
     setState(() {
-      word.isInFavoriteList = true;
       _library.addWord(word);
     });
 
@@ -101,7 +100,6 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
 
   void _remove(SingleWord word) {
     setState(() {
-      word.isInFavoriteList = false;
       _library.removeWord(word);
     });
 

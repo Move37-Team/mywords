@@ -140,7 +140,7 @@ class Dictionary {
         wordsFound.add(
             SingleWord(
                 word: top.item1,
-                synonyms: _synonymsDict[word],
+                synonyms: _synonymsDict[top.item1],
                 definition: _dictionary[top.item1],
                 isInFavoriteList: false
             )
@@ -156,5 +156,8 @@ class Dictionary {
 
     return wordsFound;
   }
+
+  String meaningOf(String word) => _dictionary[word];
+  String synonymsOf(String word) => _synonymsDict[word];
 
 }
