@@ -8,6 +8,7 @@ import 'package:mywords/components/wordTIle.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'components/debounce.dart';
 import 'components/dictionary.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() async {
   runApp(MyApp());
@@ -193,6 +194,54 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
               )
             ],
           )
+      ),
+      drawer: Drawer(
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: <Widget>[
+            DrawerHeader(
+              child: Text('My Words!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 25,
+                  fontFamily: "WorkSansLight"
+                ) ,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.blueAccent,
+              ),
+            ),
+            ListTile(
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: 10),
+                    child:Icon(Icons.library_books),
+                  ),
+                  Text('Links & Resources')
+                ],
+              ),
+              onTap: () async {
+                const url = 'https://github.com/Move37-Team/mywords';
+                if (await canLaunch(url)) {
+                  await launch(url);
+                } else {
+                  Fluttertoast.showToast(
+                      msg: "Could not open link",
+                      toastLength: Toast.LENGTH_SHORT,
+                      gravity: ToastGravity.BOTTOM,
+                      timeInSecForIosWeb: 1,
+                      backgroundColor: Colors.redAccent,
+                      textColor: Colors.white,
+                      fontSize: 16.0
+                  );
+                }
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

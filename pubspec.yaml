@@ -33,6 +33,7 @@ dependencies:
   pull_to_refresh: ^1.5.7
   tuple: ^1.0.3
   mutex: ^1.0.3
+  url_launcher: ^5.0.4
 
 
   # The following adds the Cupertino Icons font to your application.
