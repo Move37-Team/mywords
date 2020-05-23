@@ -51,6 +51,12 @@ sample
 }
 ```
 
+# Acknowledgments
+
+- Webster's Unabridged English Dictionary provided by [Project Gutenberg](https://www.gutenberg.org/ebooks/29765)
+- ```dictionary_web.json``` file provided by [this repo](https://github.com/matthewreagan/WebstersEnglishDictionary)
+- ```synonyms_dict.json``` scrapped from [WordNet](https://wordnet.princeton.edu/)
+
 ***if you make any changes, improvements or bug fixes please consider a PR***
 
 # Road Map
