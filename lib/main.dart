@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:mywords/components/LinkWidget.dart';
 import 'package:mywords/components/library.dart';
 import 'package:mywords/components/wordTIle.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -212,9 +213,10 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                 color: Colors.blueAccent,
               ),
             ),
-            ListTile(
-              title: Row(
+            LinkTile(
+              widget: Row(
                 mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
                     margin: EdgeInsets.only(right: 10),
@@ -223,22 +225,55 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
                   Text('Links & Resources')
                 ],
               ),
-              onTap: () async {
-                const url = 'https://github.com/Move37-Team/mywords';
-                if (await canLaunch(url)) {
-                  await launch(url);
-                } else {
-                  Fluttertoast.showToast(
-                      msg: "Could not open link",
-                      toastLength: Toast.LENGTH_SHORT,
-                      gravity: ToastGravity.BOTTOM,
-                      timeInSecForIosWeb: 1,
-                      backgroundColor: Colors.redAccent,
-                      textColor: Colors.white,
-                      fontSize: 16.0
-                  );
-                }
+              url: 'https://github.com/Move37-Team/mywords',
+            ),
+            Divider(),
+            ListTile(
+              onTap: () {
+                // set up the AlertDialog
+                AlertDialog alert = AlertDialog(
+                  title: Text('Acknowledgments'),
+                  content: Container(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        LinkTile(
+                          widget: Text("Webster's Unabridged Dictionary by Various"),
+                          url: 'https://www.gutenberg.org/ebooks/29765',
+                        ),
+                        LinkTile(
+                          widget: Text("WordNet by Princeton University"),
+                          url: 'https://wordnet.princeton.edu/',
+                        ),
+                        Divider(),
+
+                        LinkTile(
+                          widget: Text("My Words!"),
+                          url: 'https://github.com/Move37-Team/mywords',
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+
+                // show the dialog
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return alert;
+                  },
+                );
               },
+              title: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: 10),
+                    child:Icon(Icons.info),
+                  ),
+                  Text('Acknowledgments'),
+                ],
+              ),
             ),
           ],
         ),
